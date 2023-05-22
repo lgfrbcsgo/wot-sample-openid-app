@@ -6,7 +6,7 @@
 <body>
     <h1>Sample OpenID App</h1>
     <p>This web application uses OpenID 2.0 to verify that the user has an WG account.</p>
-    <button onclick="login()">Login</button>
+    <button onclick="loginOrVerifyIdentity()">Login / Verify Identity</button>
     <div id="output"></div>
     <script>
         const LOGIN = new URL("https://eu.wargaming.net/id/openid/").href
@@ -28,12 +28,13 @@
         }
 
         async function verifyIdentity(searchParams) {
-            const requestUrl = new URL(LOGIN)
-            requestUrl.searchParams = new URLSearchParams(searchParams)
-            requestUrl.searchParams.set("openid.mode", "check_authentication")
+            const redirectUrl = new URL(LOGIN)
+            for (const [key, value] of searchParams.entries()) {
+                redirectUrl.searchParams.set(key, value)
+            }
+            redirectUrl.searchParams.set("openid.mode", "check_authentication")
 
-            const res = await fetch(requestUrl)
-            return res.text()
+            window.location.assign(redirectUrl)
         }
 
         function appendOutput(text) {
@@ -43,12 +44,17 @@
         }
 
         const searchParams = new URL(window.location.href).searchParams
-        const openIdMode = searchParams.get("openid.mode")
-        const openIdIdentity = searchParams.get("openid.identity")
+        const identity = searchParams.get("openid.identity")
 
-        if (openIdMode === "id_res" && openIdIdentity) {
-            appendOutput(`Identity: ${openIdIdentity}`)
-            verifyIdentity(searchParams).then(appendOutput)
+        if (identity) {
+            appendOutput(`Identity: ${identity}`)
+        }
+        function loginOrVerifyIdentity() {
+            if (identity) {
+                verifyIdentity(searchParams)
+            } else {
+                login()
+            }
         }
     </script>
 </body>

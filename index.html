@@ -6,7 +6,7 @@
 <body>
     <h1>Sample OpenID App</h1>
     <p>This web application uses OpenID 2.0 to verify that the user has an WG account.</p>
-    <button onclick="loginOrVerifyIdentity()">Login / Verify Identity</button>
+    <button onclick="login()">Login</button>
     <div id="output"></div>
     <script>
         const LOGIN = new URL("https://eu.wargaming.net/id/openid/").href
@@ -37,24 +37,19 @@
             window.location.assign(redirectUrl)
         }
 
-        function appendOutput(text) {
-            const el = document.createElement("pre")
-            el.innerText = text
-            OUTPUT.append(el)
-        }
 
         const searchParams = new URL(window.location.href).searchParams
         const identity = searchParams.get("openid.identity")
 
         if (identity) {
-            appendOutput(`Identity: ${identity}`)
-        }
-        function loginOrVerifyIdentity() {
-            if (identity) {
-                verifyIdentity(searchParams)
-            } else {
-                login()
-            }
+            const pre = document.createElement("pre")
+            pre.innerText = `Identity: ${identity}`
+            OUTPUT.append(pre)
+
+            const button = document.createElement("button")
+            button.innerText = "Verify identity"
+            button.onclick = () => verifyIdentity(searchParams)
+            OUTPUT.append(button)
         }
     </script>
 </body>

@@ -42,14 +42,14 @@
         const identity = searchParams.get("openid.identity")
 
         if (identity) {
-            const pre = document.createElement("pre")
-            pre.innerText = `Identity: ${identity}`
-            OUTPUT.append(pre)
+            const p = document.createElement("p")
+            p.innerText = `Identity: ${identity}`
 
             const button = document.createElement("button")
             button.innerText = "Verify identity"
             button.onclick = () => verifyIdentity(searchParams)
-            OUTPUT.append(button)
+
+            OUTPUT.append(p, button)
         }
     </script>
 </body>

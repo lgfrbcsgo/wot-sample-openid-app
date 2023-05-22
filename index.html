@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Sample OpenID App</title>
+</head>
+<body>
+    <h1>Sample OpenID App</h1>
+    <p>This web application uses OpenID 2.0 to verify that the user has an WG account.</p>
+    <button onclick="login()">Login</button>
+    <div id="output"></div>
+    <script>
+        const LOGIN = new URL("https://eu.wargaming.net/id/openid/").href
+        const REALM = new URL("/", window.location.href).href.slice(0, -1)
+        const RETURN_TO = new URL(".", window.location.href).href
+
+        const OUTPUT = document.getElementById("output")
+
+        function login() {
+            const redirectUrl = new URL(LOGIN)
+            redirectUrl.searchParams.set("openid.ns", "http://specs.openid.net/auth/2.0")
+            redirectUrl.searchParams.set("openid.mode", "checkid_setup")
+            redirectUrl.searchParams.set("openid.realm", REALM)
+            redirectUrl.searchParams.set("openid.return_to", RETURN_TO)
+            redirectUrl.searchParams.set("openid.claimed_id", "http://specs.openid.net/auth/2.0/identifier_select")
+            redirectUrl.searchParams.set("openid.identity", "http://specs.openid.net/auth/2.0/identifier_select")
+
+            window.location.assign(redirectUrl)
+        }
+
+        async function verifyIdentity(searchParams) {
+            const requestUrl = new URL(LOGIN)
+            requestUrl.searchParams = new URLSearchParams(searchParams)
+            requestUrl.searchParams.set("openid.mode", "check_authentication")
+
+            const res = await fetch(requestUrl)
+            return res.text()
+        }
+
+        function appendOutput(text) {
+            const el = document.createElement("pre")
+            el.innerText = text
+            OUTPUT.append(el)
+        }
+
+        const searchParams = new URL(window.location.href).searchParams
+        const openIdMode = searchParams.get("openid.mode")
+        const openIdIdentity = searchParams.get("openid.identity")
+
+        if (openIdMode === "id_res" && openIdIdentity) {
+            appendOutput(`Identity: ${openIdIdentity}`)
+            verifyIdentity(searchParams).then(appendOutput)
+        }
+    </script>
+</body>
+</html>
